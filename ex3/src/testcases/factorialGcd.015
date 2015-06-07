@@ -1,0 +1,71 @@
+(*two module names Mismatched Exception *)
+MODULE factorialGcd;
+	
+	var m, n, a, b, result: integer;
+
+	PROCEDURE factorial;
+	 var n, result,  tmp: integer;
+	B1 ,B2: BOOLEAN;
+	BEGIN
+		tmp();
+		IF n <3 THEN
+			n := 23 
+		END;
+		WHILE B1 &B2 DO
+			tmp  := tmp + n;
+			n := n + 1
+		END;
+		result := tmp;
+	END factorial;
+
+
+	PROCEDURE gcd(nn, m:integer );
+	var t: integer;
+	BEGIN
+		fun1( );
+		WHILE  (7>3 ) DO
+			t := m;
+			m := nn+2+(3)+4 + 5 * 6;
+			nn := t;
+		END;
+		t := 23 *32+ 43   + 4543+3
+	END gcd;
+
+	PROCEDURE tmp(nn, m:integer; t3:boolean; T4: ARRAY 3248 OF INTEGER );
+	var t: integer;
+	BEGIN
+		fun1( );
+		WHILE  (7>3 ) DO
+			t := m;
+			m := nn+2+(3)+4 + 5 * 6;
+			nn := t;
+		END;
+		t := 23 *32+ 43   + 4543+3
+	END tmp;
+
+	PROCEDURE fun1(nn, m:integer; t3:boolean; T4: ARRAY 3248 OF INTEGER );
+	var t: integer;
+	BEGIN
+		fun1( );
+		WHILE  (7>3 ) DO
+			t := m;
+			m := nn+2+3+4 + 5 * 6;
+			nn := t;
+		END;
+		t := 23 *32+ 43   + 4543+3
+	END fun1;
+
+
+BEGIN
+	READ (m);
+	factorial(n);
+	WRITE (result) ; 
+	WRITELN;
+	 
+	READ(m); 
+	READ(n);
+	gcd(m, n);
+	WRITE(result);
+	WRITELN;;
+
+END factorialGc. 

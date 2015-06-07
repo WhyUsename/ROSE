@@ -1,0 +1,74 @@
+(* illegal symbol. *)
+MODULE factorialGcd;
+	CONST id1 = 123;
+	@@@TYPE id2 = ARRAY 10  OF INTEGER ;
+	VAR m, n, result: INTEGER;
+	 recordid: RECORD
+		id3: INTEGER;
+	END;	
+
+
+	PROCEDURE factorial  (n: INTEGER);
+		VAR tmp : INTEGER;	
+	begin	
+		gcd(3, 5);
+		read (tmp); 
+		
+	END factorial;
+
+
+	PROCEDURE gcd (m , n: INTEGER);
+		VAR t, n, m: INTEGER;
+	BEGIN
+		
+		IF (m > 3) THEN
+			t := 23
+		
+		END;
+		WHILE (m MOD n # 0) DO
+			t := m MOD n; 
+			m := n;
+			n := t;
+		END;
+	END gcd;
+
+
+	PROCEDURE tmp;
+		var t: integer;
+	BEGIN
+		fun1( );
+		WHILE  (7>3 ) DO
+			t := m;
+			m := n+2+(3)+4 + 5 * 6;
+			n := t;
+		END;
+		t := 23 *32+ 43   + 4543+3
+	END tmp;
+
+
+
+	PROCEDURE fun1;
+	var t: integer;
+	BEGIN
+		tmp( );
+		WHILE  (7>3 ) DO
+			t := m;
+			m := n+2+3+4 + 5 * 6;
+			n := t;
+		END;
+		t := 23 *32+ 43   + 4543+3
+	END fun1;
+
+begin
+	READ(n);
+	factorial(n); 
+	WRITE(result);
+	WRITELN;
+
+	READ(m);
+	READ(n);
+	gcd(m, n);
+	WRITE(result);
+	WRITELN;
+
+END factorialGcd.

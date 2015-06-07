@@ -1,0 +1,32 @@
+(*Source program of MIE-251 Computer Languages：Design and Implementation experiment 4.1 *)
+
+MODULE Sample;
+	PROCEDURE test1 (VAR x : INTEGER);
+		VAR Factorial_x : INTEGER;
+	BEGIN
+		Factorial_x := 0;
+		WHILE X >= 0 DO
+			IF x = 0 THEN 
+				Factorial_x := 0;
+			ELSE 
+				Factorial_x := x * Factorial(x-1);
+			END; 
+		END;
+		Write(Factorial_x); WriteLn
+	END test1;
+
+	PROCEDURE test2 (VAR x : INTEGER);
+		(*The identifer test_of_Factorial_of_Oberon_0 is more than 24*)
+		recordlistlistlistlistlistlist: ARRAY 100 OF RECORD；
+		arraylist: ARRAY 2 OF INTEGER;
+		VAR flag : BOOLEAN;
+	BEGIN
+		Read(flag)
+		IF flag==TRUE THEN
+			arraylist[0] := x DIV 2;
+		ELSE
+			arraylist[1] := x DIV 5;
+		END
+		Write(arraylist[0]);Write(arraylist[1]);Writeln
+	END test2
+END Sample.;

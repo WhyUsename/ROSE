@@ -1,0 +1,554 @@
+/*oberon.cup*/
+import java_cup.runtime.*;
+import exceptions.*;
+import java.util.*;
+import callgraph.*;
+
+
+/*Preliminaries to set up and use the scanner.  */
+parser code 
+{:
+	public CallGraph graph;
+	public int callee;
+
+	public String current_procedure;
+	public Vector<String>	id_name;
+	public Vector<Integer>	id_type;
+
+	public Vector<String>	exist_pro;
+	public Vector<String>	dec_pro;
+	public Vector<String>	dec_type;
+	public Vector<String>	callee_pro;
+	public Vector<String>	callee_type;
+	
+	public int get_id(String s) throws SemanticException
+	{
+		for (int i=0; i<id_name.size(); i++)
+		{
+			if (id_name.elementAt(i).equals(s) == true)
+				return id_type.elementAt(i).intValue();
+		}
+		throw new SemanticException("varible( "+ s +" ) without declaration!");
+	}
+	public int isExist(String s)
+	{
+		for (int i=0; i<exist_pro.size(); i++)
+		{
+			if (exist_pro.elementAt(i).equals(s) == true)
+				return 1;
+		}
+		return 0;
+	}
+:}
+
+init with 
+{:
+	callee = 1;
+	graph = new CallGraph();
+
+	id_name = new Vector<String>();
+	id_type = new Vector<Integer>();
+	exist_pro = new Vector<String>();
+
+	dec_pro = new Vector<String>();
+	dec_type = new Vector<String>();
+	callee_pro = new Vector<String>();
+	callee_type = new Vector<String>();
+:}
+
+scan with {: return getScanner().next_token(); :};
+
+
+/*Terminals (tokens returned by the scanner). */
+/*arithmetic operator*/
+terminal		PLUS, MINUS, TIMES, DIVIDE, MOD, ASSIGN;
+/*logical operator*/
+terminal		EQ, NEQ, LT, LE, GT, GE, OR, AND, NOT;
+/*keyword*/
+terminal		INTEGER, BOOLEAN, READ, WRITE, WRITELN, RECORD, ARRAY, MODULE, CONST, TYPE, VAR, PROCEDURE; 
+/*reserved word*/
+terminal		IF, THEN, ELSIF, ELSE, WHILE, DO, BEGIN, END, OF;
+/*other tokens*/
+terminal		SEMI, COLON, COMMA, PERIOD, LBRACKET, RBRACKET, LPAREN, RPAREN;
+/*identifier, number*/
+terminal String	IDENTIFIER;
+terminal Integer	NUMBER;
+
+
+/*non terminals */
+non terminal String	program_code;
+non terminal String	module_block, module_begin, declarations, procedure_declaration, procedure_begin;
+non terminal String	procedure_heading, procedure_body;
+non terminal	const_declare, type_declare, var_declare, const_list, type_list, var_list;
+non terminal	array_part, rw_statement, field_one, field_list;
+non terminal	statement_sequence, statement, while_statement, if_statement, elsif_statement, else_statement;
+non terminal	procedure_call, assignment, var_if;
+
+non terminal Integer	expression, type_id, selector, identifier_list, array_type, record_type, type_but_array;
+non terminal String	formal_parameters, ap_list, actual_parameters, fp_section;
+
+
+/*Precedences */
+precedence right ASSIGN;
+precedence left OR;
+precedence left AND;
+precedence right NOT;
+precedence left EQ, NEQ, LT, LE, GT, GE;
+precedence left PLUS, MINUS;
+precedence left TIMES, DIVIDE, MOD;
+precedence left LPAREN;
+
+
+
+/*The grammar */
+program_code ::=	module_block:m	
+		{:
+			int flag = 0;
+
+			//check the para
+			for (int i=0; i<parser.callee_pro.size(); i++)
+			{	
+				//System.out.println("check: lee  "+parser.callee_pro.elementAt(i) + i);
+				for (int j=0; j<parser.dec_pro.size() && flag==0; j++)
+				{	
+					//System.out.println("check: pro  "+parser.dec_pro.elementAt(j)+j);
+
+					flag = 0;
+					if (parser.callee_pro.elementAt(i).equals(parser.dec_pro.elementAt(j)) == true)
+					{
+						flag = 1;
+						if (parser.callee_type.elementAt(i).length() !=parser.dec_type.elementAt(j).length())
+							throw new ParameterMismatchedException();
+						if (parser.callee_type.elementAt(i).equals(parser.dec_type.elementAt(j)) == false)
+							throw new TypeMismatchedException();
+					}
+				}
+				if (flag == 0)
+					throw new SemanticException("the procedure<"+parser.callee_pro.elementAt(i)+"> is not declare!");
+				flag = 0;
+			}
+
+			// succeed! show the graph.
+			System.out.println("********Succeed!********");
+			parser.graph.show();
+		:};
+
+module_block ::= 	MODULE IDENTIFIER:id1 SEMI declarations module_begin END IDENTIFIER:id2 PERIOD
+		{: 
+			if (id1.equals(id2) == false)
+				throw new ModuleNameMismatchedException();
+			RESULT = id1;
+		:};
+
+module_begin ::=	BEGIN statement_sequence 
+		{:
+			//parser.graph.addProcedure("Main", "Main( )");
+		:}
+		| /*empty*/;
+		
+declarations ::=	const_declare type_declare var_declare procedure_declaration	{::};
+
+const_declare ::=	CONST const_list | /*empty*/	{::};
+
+const_list	::=	const_list IDENTIFIER:id EQ expression:e SEMI 
+		{:
+			parser.id_name.add(id.toString());
+			parser.id_type.add(e.intValue());	
+		:}
+		| /*empty*/;
+
+type_declare ::=	TYPE type_list | /*empty*/;
+
+type_list ::=	type_list IDENTIFIER:id EQ type_id:t SEMI
+		{:
+			parser.id_name.add(id.toString());
+			parser.id_type.add(t.intValue());
+		:}
+		| /*empty*/	{::};
+
+var_declare ::=	VAR var_list | /*empty*/ 	{::};
+
+var_list ::=		var_list identifier_list:id_list COLON type_id:t SEMI
+		{:
+			for (int i=0; i<id_list.intValue(); i++)
+				parser.id_type.add(t.intValue());
+		:}
+		| /*empty*/	{::};
+
+identifier_list ::=	IDENTIFIER:id
+		{:
+			parser.id_name.add(id);
+			RESULT = new Integer(1);
+		:}
+		| identifier_list:id_list COMMA IDENTIFIER:id
+		{:
+			parser.id_name.add(id);
+			RESULT = id_list.intValue()+1;
+		:};
+
+procedure_declaration ::=	/*empty*/ 
+			{:
+				//parser.graph.addProcedure("Main", "Main( )");
+				parser.callee = 1;
+			:}
+			| procedure_declaration procedure_heading:id1 SEMI procedure_body:id2 SEMI
+			{:	
+				if (id1.equals(id2) == false)
+					throw new ProcedureNameMismatchedException();
+				parser.current_procedure = "";
+				parser.callee = 1;
+			:};
+
+procedure_heading ::=	PROCEDURE IDENTIFIER:id formal_parameters:fp
+			{:
+				parser.callee = 1;
+				RESULT = id;
+				String s_tem = "";
+				for (int i=0; fp.isEmpty()==false && i<fp.length(); i++)
+				{
+					int i_tem = fp.charAt(i) - 48;
+					if (i_tem == 1)	s_tem += "int ";
+					if (i_tem == 2)	s_tem += "bool ";
+					if (i_tem == 3)	s_tem += "record ";
+					if (i_tem == 4)	s_tem +=	"array ";
+				}
+				if (parser.isExist(id) == 0)
+				{
+					parser.graph.addProcedure(id, id+"( )");
+					parser.exist_pro.add(id);
+				}
+				parser.current_procedure = id;
+				
+				parser.dec_pro.addElement(id);
+				parser.dec_type.addElement(fp);
+				//System.out.println("pro_dec:"+id +" "+fp);
+			:};
+
+procedure_body ::=		declarations procedure_begin END IDENTIFIER:id
+			{:
+				RESULT = id;
+			:};
+
+procedure_begin ::=	BEGIN statement_sequence | /*empty*/	{::};
+
+formal_parameters ::=
+		{:	RESULT = "";	:}
+		| LPAREN RPAREN
+		{:
+			RESULT = "";
+		:}
+		| LPAREN fp_section:fp RPAREN
+		{:
+			RESULT = fp.toString();
+		:};
+
+fp_section ::=	fp_section:fp SEMI var_if identifier_list:id_list COLON type_id:t
+		{:
+			RESULT = fp.toString();
+			for (int i=0; i<id_list.intValue(); i++)
+			{
+				parser.id_type.add(t.intValue());
+				RESULT += (""+t.intValue());
+			}			
+		:}
+		| var_if identifier_list:id_list COLON type_id:t
+		{:
+			RESULT = "";
+			for (int i=0; i<id_list.intValue(); i++)
+			{
+				parser.id_type.add(t.intValue());
+				RESULT += (""+t.intValue());
+			}	
+		:};
+var_if ::=		VAR | ;
+type_id ::=		type_but_array: t
+		{:
+			RESULT = t;
+		:}
+		| array_type: t	
+		{:
+			RESULT = t;
+		:};
+type_but_array ::=	IDENTIFIER:id
+		{:
+			RESULT = 	parser.get_id(id);
+		:}
+		| INTEGER 
+		{:
+			RESULT = new Integer(1);	/*1 is int*/
+		:}
+		| BOOLEAN
+		{:
+			RESULT = new Integer(2);	/*2 is bool*/
+		:}
+		| record_type: t	
+		{: 
+			RESULT = new Integer(4);
+		:};
+
+record_type ::=	RECORD field_list END	{::};
+field_list ::=	field_list SEMI field_one | field_one {::};
+field_one ::=	| identifier_list COLON type_id	{::};
+
+array_type ::=	array_part type_but_array	
+		{:
+			RESULT = new Integer(3);
+		:};
+array_part ::=	array_part ARRAY expression OF | ARRAY expression OF{::};
+
+
+statement_sequence ::=	statement | statement_sequence SEMI statement	{::};
+statement	::=	assignment | procedure_call | if_statement | while_statement | rw_statement | /*empty*/	{::};
+
+rw_statement ::=	  READ LPAREN IDENTIFIER RPAREN 
+		| READ IDENTIFIER RPAREN 
+		{:	if (true)	throw new MissingLeftParenthesisException();	:}
+		| READ LPAREN IDENTIFIER 	
+		{:	if (true)	throw new MissingRightParenthesisException();	:}
+		| WRITE IDENTIFIER RPAREN 
+		{:	if (true)	throw new MissingLeftParenthesisException();	:}
+		| READ LPAREN RPAREN
+		{:
+			if (true)	throw new MissingOperatorException();
+		:}
+		| WRITE LPAREN RPAREN
+		{:
+			if (true)	throw new MissingOperatorException();
+		:}
+		| WRITE LPAREN IDENTIFIER 	
+		{:	if (true)	throw new MissingRightParenthesisException();	:}
+		| WRITE LPAREN IDENTIFIER RPAREN 
+		| WRITELN ;
+while_statement ::=	WHILE expression:e DO statement_sequence END	
+		{:
+			if (e.intValue() != 2)	throw new TypeMismatchedException();
+		:};
+if_statement ::=	IF expression:e THEN statement_sequence elsif_statement else_statement END	
+		{:
+			if (e.intValue() != 2)	throw new TypeMismatchedException();	
+		:};
+elsif_statement ::=	elsif_statement ELSIF expression THEN statement_sequence | /*empty*/	{::};
+else_statement ::=	/*empty*/ | ELSE statement_sequence	{::};
+
+procedure_call ::=	IDENTIFIER:id actual_parameters: ap	
+		{:
+			String s_tem = "";
+			for (int i=0; ap.isEmpty()==false && i<ap.length(); i++)
+			{
+				int i_tem = ap.charAt(i) - 48;
+				if (i_tem == 1)	s_tem += "int ";
+				if (i_tem == 2)	s_tem += "bool ";
+				if (i_tem == 3)	s_tem += "record ";
+				if (i_tem == 4)	s_tem +=	"array ";
+			}
+			parser.callee_pro.addElement(id);
+			parser.callee_type.addElement(ap);
+			//System.out.println("callee:"+id +" "+ap);
+
+			if (parser.callee==1 && parser.current_procedure.isEmpty())
+			{
+				parser.current_procedure = "Main";
+				parser.graph.addProcedure("Main", "Main( )");
+			}
+			parser.graph.addCallSite(parser.current_procedure+parser.callee, parser.current_procedure, id+"( "+s_tem+")");
+			if (parser.isExist(id) == 0)
+			{
+				parser.graph.addProcedure(id, id+"( )");
+				parser.exist_pro.add(id);
+			}
+			parser.graph.addEdge(parser.current_procedure+parser.callee, id);
+			parser.callee++;
+		:};
+actual_parameters::=	 {:	RESULT = "";	:}
+		| LPAREN ap_list:ap RPAREN
+		{:	RESULT = ap.toString();	:};
+ap_list ::=		ap_list:ap COMMA expression:e
+		{:
+			RESULT = ap.toString() + e.toString();
+		:}
+		| expression:e
+		{:
+			RESULT = e.toString();
+		:}
+		| 
+		{:
+			RESULT = "";
+		:};
+assignment ::=	IDENTIFIER:id selector:s  ASSIGN expression:e	
+		{:
+			if (s.intValue() != 0)
+			{
+				if (s.intValue() != e.intValue())
+					throw new TypeMismatchedException();
+			}
+			else
+			{
+				if (parser.get_id(id) != e.intValue())
+					throw new TypeMismatchedException();
+			}
+		:};
+
+expression ::= 	  NUMBER NUMBER 	{:	if (true)	throw new MissingOperatorException();	:}
+		| EQ expression:e1		{:	if (true)	throw new MissingOperandException();	:}
+		| expression:e1 EQ		{:	if (true)	throw new MissingOperandException();	:}
+		| expression:e1 EQ expression:e2
+		{:
+			if (e1.intValue() != 1 || e2.intValue() != 1)
+				throw new TypeMismatchedException();
+			RESULT = new Integer(2);
+		:}
+
+		| NEQ expression:e1		{:	if (true)	throw new MissingOperandException();	:}
+		| expression:e1 NEQ		{:	if (true)	throw new MissingOperandException();	:}
+		| expression:e1 NEQ expression:e2
+		{:
+			if (e1.intValue() != 1 || e2.intValue() != 1)
+				throw new TypeMismatchedException("44444");
+			RESULT = new Integer(2);
+		:}
+
+		| LE expression:e1		{:	if (true)	throw new MissingOperandException();	:}
+		| expression:e1 LE		{:	if (true)	throw new MissingOperandException();	:}
+		| expression:e1 LE expression:e2
+		{:
+			if (e1.intValue() != 1 || e2.intValue() != 1)
+				throw new TypeMismatchedException("44444");
+			RESULT = new Integer(2);
+		:}
+
+		| LT expression:e1		{:	if (true)	throw new MissingOperandException();	:}
+		| expression:e1 LT		{:	if (true)	throw new MissingOperandException();	:}
+		| expression:e1 LT expression:e2
+		{:
+			if (e1.intValue() != 1 || e2.intValue() != 1)
+				throw new TypeMismatchedException("44444");
+			RESULT = new Integer(2);
+		:}
+		| GE expression:e1		{:	if (true)	throw new MissingOperandException();	:}
+		| expression:e1 GE		{:	if (true)	throw new MissingOperandException();	:}
+		| expression:e1 GE expression:e2
+		{:
+			if (e1.intValue() != 1 || e2.intValue() != 1)
+				throw new TypeMismatchedException();
+			RESULT = new Integer(2);
+		:}
+
+		| GT expression:e1		{:	if (true)	throw new MissingOperandException();	:}
+		| expression:e1 GT		{:	if (true)	throw new MissingOperandException();	:}
+		|expression:e1 GT expression:e2
+		{:
+			if (e1.intValue() != 1 || e2.intValue() != 1)
+				throw new TypeMismatchedException();
+			RESULT = new Integer(2);
+		:}
+		
+		
+		| PLUS expression:e1		{:	if (true)	throw new MissingOperandException();	:}
+		| expression:e1 PLUS		{:	if (true)	throw new MissingOperandException();	:}
+		| expression:e1 PLUS expression:e2 
+		{:
+			if (e1.intValue() != 1 || e2.intValue() != 1)
+				throw new TypeMismatchedException();
+			RESULT = e1;
+		:}
+
+		| MINUS expression:e1		{:	if (true)	throw new MissingOperandException();	:}
+		| expression:e1 MINUS		{:	if (true)	throw new MissingOperandException();	:}
+		| expression:e1 MINUS expression:e2 
+		{:
+			if (e1.intValue() != 1 || e2.intValue() != 1)
+				throw new TypeMismatchedException();
+			RESULT = e1;
+		:}
+
+		| TIMES expression:e1		{:	if (true)	throw new MissingOperandException();	:}
+		| expression:e1 TIMES		{:	if (true)	throw new MissingOperandException();	:}
+		| expression:e1 TIMES expression:e2 
+		{:
+			if (e1.intValue() != 1 || e2.intValue() != 1)
+				throw new TypeMismatchedException();
+			RESULT = e1;
+		:}
+
+		| DIVIDE expression:e1		{:	if (true)	throw new MissingOperandException();	:}
+		| expression:e1 DIVIDE		{:	if (true)	throw new MissingOperandException();	:}
+		| expression:e1 DIVIDE expression:e2 
+		{:
+			if (e1.intValue() != 1 || e2.intValue() != 1)
+				throw new TypeMismatchedException();
+			RESULT = e1;
+		:}
+
+		| MOD expression:e1		{:	if (true)	throw new MissingOperandException();	:}
+		| expression:e1 MOD		{:	if (true)	throw new MissingOperandException();	:}
+		| expression:e1 MOD expression:e2 
+		{:
+			if (e1.intValue() != 1 || e2.intValue() != 1)
+				throw new TypeMismatchedException();
+			RESULT = e1;
+		:}
+
+		| AND expression:e1		{:	if (true)	throw new MissingOperandException();	:}
+		| expression:e1 AND		{:	if (true)	throw new MissingOperandException();	:}
+		| expression:e1 AND expression:e2
+		{:
+			if (e1.intValue() != 2 || e2.intValue() != 2)
+				throw new TypeMismatchedException();
+			RESULT = e1;
+		:}
+
+		| OR expression:e1 		{:	if (true)	throw new MissingOperandException();	:}
+		| expression:e1 OR 		{:	if (true)	throw new MissingOperandException();	:}
+		| expression:e1 OR expression:e2
+		{:
+			if (e1.intValue() != 2 || e2.intValue() != 2)
+				throw new TypeMismatchedException();
+			RESULT = e1;
+		:}
+
+		| NOT			{:	if (true)	throw new MissingOperandException();	:}
+		| NOT expression:e
+		{:
+			if (e.intValue() != 2)
+				throw new TypeMismatchedException();
+			RESULT = e;
+		:}
+
+		| LPAREN expression:e RPAREN	{:	RESULT = e;	:}
+		| LPAREN RPAREN{:		if (true)	throw new MissingOperandException();		:}
+
+		| IDENTIFIER:id selector: s
+		{:
+			if (s.intValue() != 0)
+				RESULT = s;
+			else
+				RESULT = new Integer(parser.get_id(id));
+		:}
+
+		| NUMBER
+		{:
+			RESULT = new Integer(1);
+		:};
+
+selector ::=	  selector PERIOD IDENTIFIER:id
+		{:	
+			RESULT = new Integer(parser.get_id(id));	
+		:}
+		| selector LBRACKET expression RBRACKET 
+		{:
+			RESULT = new Integer(0);
+		:}
+		|
+		{:
+			RESULT = new Integer(0);
+		:};
+	
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,26 @@
+MODULE CallGraph;
+	VAR x, y: INTEGER;
+
+	PROCEDURE a;
+	BEGIN
+		b(x, 1);
+		c(y, 2);
+	END a;
+
+
+	PROCEDURE b(i: INTEGER; j: INTEGER);
+	BEGIN
+		x := i + j;
+	END b;
+
+	PROCEDURE c(i: INTEGER; j: INTEGER);
+	BEGIN
+		b(x + i, 2 * j);
+		d(2 * i, y + j);
+	END c;
+
+	PROCEDURE d(i: INTEGER; j: INTEGER);
+	BEGIN
+		y := i * j;
+	END d;
+END CallGraph.

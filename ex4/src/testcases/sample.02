@@ -1,0 +1,37 @@
+(* A Oberon-0 source program for factorial and gcd operation. *)
+module factorialGcd;
+	procedure factorial(n:integer);
+		var result: integer;
+	begin
+		n := 23;;;
+		read(n);
+		result := 1;
+		while n > 1 do
+			result := result * n;
+			n := n - 1;
+		end;
+		gcd(100, 32);
+		write(result); writeln;
+	end factorial;
+
+
+	procedure gcd(var m, n: Integer);
+		var  t: integer;
+	begin
+		n := n*m+t div m * 3;
+		read(m); read(n);
+		factorial(n);
+		while m mod n # 0 do
+			t := m;
+			m := n;
+			n := t;
+		end;
+		write(n); writeln;
+	end gcd;
+begin
+
+	gcd(result , 89);
+	factorial(9);
+	gcd(23, 3+3);
+
+end factorialGcd.
