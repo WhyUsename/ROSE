@@ -1,9 +1,6 @@
-ex4ÊÇÀûÓÃJFlexÉú³ÉµÄÓï·¨·ÖÎöÆ÷ºÍ×Ô¼ºÊµÏÖµÄÓïÒå·ÖÎöÆ÷,¶ÔOberon½øĞĞ±àÒë.
+ex4æ˜¯åˆ©ç”¨JFlexç”Ÿæˆçš„è¯­æ³•åˆ†æå™¨å’Œè‡ªå·±å®ç°çš„è¯­ä¹‰åˆ†æå™¨,å¯¹Oberonè¿›è¡Œç¼–è¯‘.
 
-build.bat	±àÒëËùÓĞµÄjava´úÂë
-doc.bat	Îªjava´úÂëÉú³ÉjavadocÎÄµµ
-run.bat	²âÊÔsrc\testcases\factorialGcd.*µÄ´úÂëµÄÓïÒåÊÇ·ñÕıÈ·,ÕıÈ·µÄ»°Éú³Éº¯ÊıÁ÷³ÌÍ¼
-test.bat	²âÊÔsrc\testcases\sample.*µÄ´úÂëµÄÓï·¨ÊÇ·ñÕıÈ·,ÕıÈ·µÄ»°Éú³Éº¯ÊıÁ÷³ÌÍ¼
-
-by jammy-chan
-chenzemin23@gmail.com
+build.bat	ç¼–è¯‘æ‰€æœ‰çš„javaä»£ç 
+doc.bat	ä¸ºjavaä»£ç ç”Ÿæˆjavadocæ–‡æ¡£
+run.bat	æµ‹è¯•src\testcases\factorialGcd.*çš„ä»£ç çš„è¯­ä¹‰æ˜¯å¦æ­£ç¡®,æ­£ç¡®çš„è¯ç”Ÿæˆå‡½æ•°æµç¨‹å›¾
+test.bat	æµ‹è¯•src\testcases\sample.*çš„ä»£ç çš„è¯­æ³•æ˜¯å¦æ­£ç¡®,æ­£ç¡®çš„è¯ç”Ÿæˆå‡½æ•°æµç¨‹å›¾
