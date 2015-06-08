@@ -194,18 +194,18 @@ Modula-2、 Oberon 这一家族的语言）来理解。<br>
 Oberon-0 允许类型声明，即以一个标识符重命名一个基本数据类型或复合数据类型。例如，<br>
 
 ```
-****TYPE****
-	UserId = ****INTEGER****;
-	VisitRecord = ****RECORD****
+TYPE
+	UserId = NTEGER;
+	VisitRecord = RECORD
 		user: UserId;
-		visits: ****INTEGER****
-	****END****;
+		visits: INTEGER
+	END;
 ```
 
 此后，即可用这些标识符作为类型，以声明其他变量。例如，<br>
 
 ```
-****VAR****
+VAR
 	id1, id2: UserId;
 	rec: VisitRecord;
 ```
@@ -220,12 +220,12 @@ Oberon-0 语言支持两种选择符：“ .”用于访问记录中的一个域
 例如，以下选择符的使用是合法的：<br>
 
 ```
-****VAR****
-	accountList: ****ARRAY**** 100 ****OF RECORD****
-		account: ****INTEGER****;
-		balance: ****INTEGER****
-	****END****;
-****BEGIN****
+VAR
+	accountList: ARRAY 100 OF RECORD
+		account: INTEGER;
+		balance: INTEGER
+	END;
+BEGIN
 	accountList[1].account := 101;
 	accountList[1].balance := 8500;
 	...
