@@ -103,7 +103,7 @@ ROSE 实验项目是编译原理课程的一个综合型、应用型实验，为
 上述“程序变异”的思路源于软件测试技术中的变异测试（Mutation Testing）。变异测试的目标是筛选
 更有效的测试数据，其思路是通过变异（Mutation）操作在程序中植入一个错误，变异后的程序称为变
 异程序（Mutant）；通过检查测试数据能否发现变异程序中的这些错误，可判断测试数据的有效性。有
-兴趣的同学不妨查阅相关资料（例如：http://en.wikipedia.org/wiki/Mutation_testing）进一步学习变异测
+兴趣的同学不妨查阅相关资料（例如：http://en.wikipedia.org/wiki/Mutation_testing  ） 进一步学习变异测
 试技术。
 
 ####2.1.3 实验步骤 1.3、讨论 Oberon-0 语言的特点
