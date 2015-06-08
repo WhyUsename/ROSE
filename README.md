@@ -187,7 +187,7 @@ JFLEX_HOME 和 JAVA_HOME 的设置。然后运行 JFlex 附带的输入源文件
 
 比较以下 3 种流行的词法分析程序自动生成工具之间的差异：JFlex、JLex 和 GNU Flex。主要讨论这些
 软件工具接收输入源文件时，在词法规则定义方面存在的差异。<br>
-在网站 http://www.cs.princeton.edu/~appel/modern/java/JLex/可找到关于 JLex 工具的权威资料；关于 GNU
+在网站 http://www.cs.princeton.edu/~appel/modern/java/JLex/  可找到关于 JLex 工具的权威资料；关于 GNU
 Flex 的官方资料则位于 http://www.gnu.org/software/flex/。
 
 ####2.2.6 提交结果
